@@ -18,7 +18,7 @@
 global:
   projectName: free5gc
   userPlaneArchitecture: single  # possible values are "single" and "ulcl"
-  uesubnet: 10.1.0.0/16
+  uesubnet: 10.1.0.0/24
 #Global network parametes
   n4network:
     name: n4network
@@ -74,6 +74,7 @@ upf:
   imagePullSecrets: []
   podSecurityContext: {}
   securityContext:
+    privileged: true
     capabilities:
       add: ["NET_ADMIN"]
   resources:
@@ -112,7 +113,7 @@ upf:
 
       dnn_list:
         - dnn: internet
-          cidr: 10.1.0.0/17
+          cidr: 10.1.0.0/24
           # [optional] apn_list[*].natifname
           natifname: n6
 
