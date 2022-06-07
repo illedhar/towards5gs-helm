@@ -1,0 +1,42 @@
+#
+# Software Name : towards5gs-helm-nat
+# SPDX-FileCopyrightText: Copyright (c) 2022 TU Darmstadt
+# SPDX-License-Identifier: Apache-2.0
+#
+# This software is distributed under the Apache License 2.0,
+# the text of which is available at https://github.com/Orange-OpenSource/towards5gs-helm/blob/main/LICENSE
+# or see the "LICENSE" file for more details.
+#
+# Author: Tobias MEUSER
+# Software description: A simple linux-based NAT implementation to complement free5gc
+#
+{{- with .Values.nat }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .configmap.name }}
+  labels:
+    app: {{ $.Values.global.projectName }}
+data:
+  wrapper.sh: |
+    #!/bin/sh
+
+    ### Implement networking rules
+    sysctl -w net.ipv4.ip_forward=1
+
+    apt update && apt install -y iproute2 iptables
+
+    ip route add {{ $.Values.global.uesubnet }} dev n6
+
+    iptables -I FORWARD 1 -j ACCEPT
+    iptables -t nat -A POSTROUTING -s {{ $.Values.global.uesubnet }} -o eth0 -j MASQUERADE
+    iptables -t nat -A POSTROUTING -s {{ $.Values.global.n6network.subnetIP }}/{{ $.Values.global.n6network.cidr }} -o eth0 -j MASQUERADE
+    #iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+    #iptables -t raw -A POSTROUTING -j TRACE
+    #iptables -t nat -A POSTROUTING -s {{ $.Values.global.uesubnet }} -o eth0 -j MASQUERADE  # route traffic comming from the UE SUBNET to the interface N6    
+    #echo "1200 n6if" >> /etc/iproute2/rt_tables # create a routing table for the interface N6
+    #ip rule add from {{ $.Values.global.uesubnet }} table n6if   # use the created ip table to route the traffic comming from the UE SUBNET 
+    #ip route add default via {{ $.Values.global.n6network.gatewayIP }} dev n6 table n6if  # add a default route in the created table so that all UEs will use this gateway for external communications (target IP not in the Data Network attached to the interface N6) and then the Data Network will manage to route the traffic
+    /bin/sleep 3650d
+
+{{- end }}

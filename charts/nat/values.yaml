@@ -1,0 +1,90 @@
+#
+# Software Name : towards5gs-helm-nat
+# SPDX-FileCopyrightText: Copyright (c) 2022 TU Darmstadt
+# SPDX-License-Identifier: Apache-2.0
+#
+# This software is distributed under the Apache License 2.0,
+# the text of which is available at https://github.com/Orange-OpenSource/towards5gs-helm/blob/main/LICENSE
+# or see the "LICENSE" file for more details.
+#
+# Author: Tobias MEUSER
+# Software description: A simple linux-based NAT implementation to complement free5gc
+#
+# Default values for NAT chart.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+
+global:
+  projectName: free5gc-nat
+  uesubnet: 10.1.0.0/24
+  n6network:
+    name: n6network
+    masterIf: eth0
+    subnetIP: 10.100.100.0
+    cidr: 24
+    gatewayIP: 10.100.100.1
+    excludeIP: 10.100.100.254
+nat:
+  name: free5gc-nat
+  replicaCount: 1
+  image:
+    name: ubuntu
+    tag: 18.04
+    pullPolicy: Always
+  configmap:
+    name: nat-configmap
+  volume:
+    name: nat-volume
+    mount: /free5gc/config/
+
+  n6if:  # DN
+    ipAddress: 10.100.100.21
+
+  podAnnotations: {}
+    # additional annotations
+  imagePullSecrets: []
+  podSecurityContext: {}
+  securityContext:
+    privileged: true
+    capabilities:
+      add: ["NET_ADMIN"]
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 500m
+      memory: 512Mi
+  readinessProbe:
+    initialDelaySeconds: 0
+    periodSeconds: 1
+    timeoutSeconds: 1
+    failureThreshold:  40
+    successThreshold: 1
+  livenessProbe:
+    initialDelaySeconds: 120
+    periodSeconds: 10
+    timeoutSeconds: 10
+    failureThreshold: 3
+    successThreshold: 1
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 100
+    targetCPUUtilizationPercentage: 80
+    # targetMemoryUtilizationPercentage: 80
+  configuration:
+    configuration:
+      # debugLevel: panic|fatal|error|warn|info|debug|trace
+      debugLevel: info
+      ReportCaller: false
+
+      dnn_list:
+        - dnn: internet
+          cidr: 10.1.0.0/24
+          # [optional] apn_list[*].natifname
+          natifname: n6

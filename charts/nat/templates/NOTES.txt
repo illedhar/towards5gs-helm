@@ -1,0 +1,12 @@
+#
+# Software Name : towards5gs-helm-nat
+# SPDX-FileCopyrightText: Copyright (c) 2022 TU Darmstadt
+# SPDX-License-Identifier: Apache-2.0
+#
+# This software is distributed under the Apache License 2.0,
+# the text of which is available at https://github.com/Orange-OpenSource/towards5gs-helm/blob/main/LICENSE
+# or see the "LICENSE" file for more details.
+#
+# Author: Tobias MEUSER
+# Software description: A simple linux-based NAT implementation to complement free5gc
+#

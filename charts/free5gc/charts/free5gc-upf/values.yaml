@@ -18,6 +18,7 @@
 global:
   projectName: free5gc
   userPlaneArchitecture: single  # possible values are "single" and "ulcl"
+  networkAccessTranslation: separated # possible values are "integrated" and "separated"
   uesubnet: 10.1.0.0/24
 #Global network parametes
   n4network:
@@ -39,7 +40,7 @@ global:
     masterIf: eth0
     subnetIP: 10.100.100.0
     cidr: 24
-    gatewayIP: 10.100.100.1
+    gatewayIP: 10.100.100.21
     excludeIP: 10.100.100.254
   n9network:
     name: n9network

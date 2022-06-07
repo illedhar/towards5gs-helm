@@ -37,21 +37,28 @@ data:
         # [optional] gtpu.ifname
         # - ifname: gtpif
     
+{{- if eq $.Values.global.networkAccessTranslation "separated" }}
   wrapper.sh: |
     #!/bin/sh
 
     ### Implement networking rules
     sysctl -w net.ipv4.ip_forward=1
-    iptables -I FORWARD 1 -j ACCEPT
-    iptables -t nat -A POSTROUTING -s {{ $.Values.global.uesubnet }} -o eth0 -j MASQUERADE
-    #iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
-    #iptables -t raw -A POSTROUTING -j TRACE
-    #iptables -t nat -A POSTROUTING -s {{ $.Values.global.uesubnet }} -o eth0 -j MASQUERADE  # route traffic comming from the UE SUBNET to the interface N6    
-    #echo "1200 n6if" >> /etc/iproute2/rt_tables # create a routing table for the interface N6
-    #ip rule add from {{ $.Values.global.uesubnet }} table n6if   # use the created ip table to route the traffic comming from the UE SUBNET 
-    #ip route add default via {{ $.Values.global.n6network.gatewayIP }} dev n6 table n6if  # add a default route in the created table so that all UEs will use this gateway for external communications (target IP not in the Data Network attached to the interface N6) and then the Data Network will manage to route the traffic
+    
+    ip route del default
+    ip route add default via {{ $.Values.global.n6network.gatewayIP }} dev n6  # add a default route in the created table so that all UEs will use this gateway for external communications (target IP not in the Data Network attached to the interface N6) and then the Data Network will manage to route the traffic
 
     /free5gc/free5gc-upfd/free5gc-upfd -c {{ .volume.mount }}/upfcfg.yaml
+{{- else }}
+  wrapper.sh: |
+    #!/bin/sh
 
+    ### Implement networking rules
+    sysctl -w net.ipv4.ip_forward=1
+    
+    iptables -I FORWARD 1 -j ACCEPT
+    iptables -t nat -A POSTROUTING -s {{ $.Values.global.uesubnet }} -o eth0 -j MASQUERADE
+
+    /free5gc/free5gc-upfd/free5gc-upfd -c {{ .volume.mount }}/upfcfg.yaml
+{{- end }}
 {{- end }}
 {{- end }}
