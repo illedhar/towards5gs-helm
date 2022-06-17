@@ -18,6 +18,14 @@ metadata:
   labels:
     app: {{ $.Values.global.projectName }}
 data:
+  wrapper.sh: |
+    #!/bin/sh
+    mkdir -p /free5gc/config-ip
+    cp /free5gc/config/smfcfg.yaml /free5gc/config-ip/
+    export IP=$(ip -f inet addr show eth0 | awk '/inet / {print $2}' | cut -d/ -f1)
+    sed -i "s~pfcp_endpoint~$IP~g" /free5gc/config-ip/smfcfg.yaml
+    /free5gc/smf/smf -c /free5gc/config-ip/smfcfg.yaml -u /free5gc/config/uerouting.yaml
+
   smfcfg.yaml: |
     info:
       version: 1.0.2
@@ -39,7 +47,7 @@ data:
       nrfUri: {{ $.Values.global.sbi.scheme }}://{{ $.Values.global.nrf.service.name }}:{{ $.Values.global.nrf.service.port }}
 
       pfcp:
-        addr: {{ $.Values.global.smf.n4if.ipAddress }}
+        addr: "pfcp_endpoint"
       
       {{- .configuration.configuration | nindent 6 }}
 

@@ -76,8 +76,9 @@ spec:
           containerPort: 8805
           protocol: UDP
         {{- end }}
-        command: ["./smf"]
-        args: ["-c", "../config/smfcfg.yaml", "-u", "../config/uerouting.yaml"]
+        command: ["{{ .volume.mount }}/wrapper.sh"]
+#        command: ["./smf"]
+#        args: ["-c", "../config/smfcfg.yaml", "-u", "../config/uerouting.yaml"]
         env:
           - name: GIN_MODE
             value: release
@@ -106,4 +107,7 @@ spec:
                 path: smfcfg.yaml
               - key: uerouting.yaml
                 path: uerouting.yaml
+              - key: wrapper.sh
+                path: wrapper.sh
+                mode: 0777
 {{- end }}
